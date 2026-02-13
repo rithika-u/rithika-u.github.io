@@ -1,0 +1,88 @@
+name: nightly-arxiv-fetch
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      KEYWORDS: "machine learning, deep learning"
+      MAX_RESULTS: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install feedparser
+
+      - name: Fetch arXiv and write data/arxiv.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEYWORDS: ${{ env.KEYWORDS }}
+          MAX_RESULTS: ${{ env.MAX_RESULTS }}
+        run: |
+          python - <<'PY'
+          import os, json, re
+          import feedparser
+          keywords = os.environ.get('KEYWORDS','machine learning')
+          max_results = int(os.environ.get('MAX_RESULTS','10'))
+          # build query (search in all fields)
+          q = ' OR '.join(k.strip() for k in keywords.split(','))
+          q = re.sub(r'\s+', '+', q)
+          url = f'https://export.arxiv.org/api/query?search_query=all:{q}&start=0&max_results={max_results}'
+          print('Querying', url)
+          feed = feedparser.parse(url)
+          entries = []
+          for e in feed.entries[:max_results]:
+            title = e.title
+            authors = [a.name for a in e.authors] if 'authors' in e else []
+            summary = e.summary
+            pdf_link = None
+            for l in e.links:
+              if l.rel == 'alternate' and l.type == 'text/html':
+                # not pdf
+                continue
+              if 'title' in l and 'pdf' in l.title.lower():
+                pdf_link = l.href
+            if not pdf_link:
+              # fallback to id with pdf extension
+              pdf_link = e.id.replace('abs','pdf') + '.pdf'
+            entries.append({
+              'title': title,
+              'authors': authors,
+              'abstract': summary,
+              'pdf_link': pdf_link,
+              'published': e.get('published', '')
+            })
+          os.makedirs('data', exist_ok=True)
+          with open('data/arxiv.json','w',encoding='utf-8') as f:
+            json.dump(entries, f, ensure_ascii=False, indent=2)
+          print('Wrote', len(entries), 'entries to data/arxiv.json')
+
+      - name: Commit and push if changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/arxiv.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update arXiv data (scheduled)"
+            git push origin HEAD:main
+          fi

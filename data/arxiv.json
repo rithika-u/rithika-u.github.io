@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Example Paper One: Advances in Machine Learning",
+    "authors": ["A. Researcher", "B. Scientist"],
+    "abstract": "This is a short abstract for example paper one. It explains the main contributions and methods used.",
+    "pdf_link": "https://arxiv.org/pdf/0000.00001.pdf",
+    "published": "2026-01-01T00:00:00Z"
+  },
+  {
+    "title": "Example Paper Two: Deep Networks",
+    "authors": ["C. Engineer"],
+    "abstract": "Example abstract for paper two covering deep learning architectures and experiments.",
+    "pdf_link": "https://arxiv.org/pdf/0000.00002.pdf",
+    "published": "2026-01-02T00:00:00Z"
+  },
+  {
+    "title": "Example Paper Three: Bayesian Methods",
+    "authors": ["D. Analyst", "E. Stat"],
+    "abstract": "Example abstract for paper three covering Bayesian techniques applied to model uncertainty.",
+    "pdf_link": "https://arxiv.org/pdf/0000.00003.pdf",
+    "published": "2026-01-03T00:00:00Z"
+  }
+]
