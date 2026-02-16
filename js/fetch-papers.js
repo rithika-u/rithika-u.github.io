@@ -4,11 +4,16 @@ async function fetchArXivPapers(categories = ['cs.AI', 'cs.LG', 'stat.ML'], maxR
     if (!response.ok) throw new Error(`Failed to load: ${response.status}`);
     
     const papers = await response.json();
-    cacheHasPapers(papers);
-    return papers;
+    console.log('Successfully loaded papers:', papers.length);
+    if (Array.isArray(papers) && papers.length > 0) {
+      cacheHasPapers(papers);
+    }
+    return papers || [];
   } catch (error) {
     console.error('Failed to fetch papers:', error);
-    return getCachedPapers();
+    const cached = getCachedPapers();
+    console.log('Using cached papers:', cached.length);
+    return cached;
   }
 }
 

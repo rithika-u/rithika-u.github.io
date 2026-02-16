@@ -13,7 +13,15 @@ class PapersPage {
 
   async init() {
     this.showLoading();
+    console.log('Initializing papers page...');
+    
     let papers = await fetchArXivPapers(this.selectedCategories);
+    console.log('Fetched papers:', papers ? papers.length : 0);
+    
+    if (!papers || !Array.isArray(papers)) {
+      console.error('Papers is not an array:', papers);
+      papers = [];
+    }
     
     // Convert published dates from strings to Date objects
     papers = papers.map(paper => ({
@@ -23,9 +31,11 @@ class PapersPage {
     }));
     
     this.allPapers = papers;
+    console.log('Processed papers:', this.allPapers.length);
     
     if (this.allPapers.length === 0) {
-      this.showError();
+      console.warn('No papers loaded, showing empty state');
+      this.showEmpty();
       return;
     }
     
@@ -224,6 +234,8 @@ class PapersPage {
 
   updateLastUpdated() {
     const timestamp = getCacheTimestamp();
+    console.log('Cache timestamp:', timestamp);
+    
     if (timestamp) {
       const formatted = timestamp.toLocaleDateString('en-US', {
         year: 'numeric',
@@ -234,7 +246,7 @@ class PapersPage {
       });
       document.getElementById('lastUpdate').textContent = formatted;
     } else {
-      document.getElementById('lastUpdate').textContent = 'Just now';
+      document.getElementById('lastUpdate').textContent = 'Now';
     }
   }
 
@@ -249,6 +261,13 @@ class PapersPage {
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('errorState').style.display = 'block';
     document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('papersList').innerHTML = '';
+  }
+
+  showEmpty() {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'block';
     document.getElementById('papersList').innerHTML = '';
   }
 
