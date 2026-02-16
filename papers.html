@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Latest Research Papers from arXiv">
+  <title>📚 Latest Research Papers</title>
+  <link rel="stylesheet" href="css/papers.css">
+</head>
+<body>
+  <header class="papers-header">
+    <h1>📚 Latest Research Papers</h1>
+    <p class="header-subtitle">Discover the latest papers in AI, Machine Learning, and Data Science</p>
+    <p class="updated-at">Last updated: <span id="lastUpdate">Loading...</span></p>
+  </header>
+
+  <main class="papers-wrapper">
+    <aside class="papers-filters">
+      <div class="filter-group">
+        <h3>Search</h3>
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input"
+          placeholder="Enter keywords..."
+          aria-describedby="searchHint"
+        >
+        <small id="searchHint">Searches titles, authors, and abstracts</small>
+      </div>
+
+      <div class="filter-group">
+        <h3>Categories</h3>
+        <div id="categoryFilters" class="category-list">
+          <label class="category-option">
+            <input type="checkbox" class="category-checkbox" value="cs.AI" checked>
+            AI
+          </label>
+          <label class="category-option">
+            <input type="checkbox" class="category-checkbox" value="cs.LG" checked>
+            Machine Learning
+          </label>
+          <label class="category-option">
+            <input type="checkbox" class="category-checkbox" value="stat.ML" checked>
+            Statistics ML
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3>Sort By</h3>
+        <select id="sortSelect" class="sort-select">
+          <option value="date-desc">Newest First</option>
+          <option value="date-asc">Oldest First</option>
+          <option value="title">Title (A-Z)</option>
+        </select>
+      </div>
+
+      <button id="clearFilters" class="btn btn-secondary">Clear Filters</button>
+    </aside>
+
+    <section class="papers-container">
+      <!-- Loading state -->
+      <div id="loadingState" class="state-message loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading papers...</p>
+      </div>
+
+      <!-- Error state -->
+      <div id="errorState" class="state-message error" style="display: none;">
+        <p>⚠️ Unable to load papers. Please refresh or try again later.</p>
+        <button onclick="location.reload()" class="btn btn-primary">Refresh Page</button>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="state-message empty" style="display: none;">
+        <p>No papers found matching your filters.</p>
+        <button id="resetFiltersBtn" class="btn btn-secondary">Reset Filters</button>
+      </div>
+
+      <!-- Papers grid -->
+      <div id="papersList" class="papers-grid" role="feed" aria-label="Research papers">
+        <!-- Paper cards populated here -->
+      </div>
+
+      <!-- Pagination -->
+      <div id="paginationContainer" class="pagination" style="display: none;">
+        <button id="prevBtn" class="btn btn-secondary" disabled>← Previous</button>
+        <span id="pageInfo" class="page-info">Page 1</span>
+        <button id="nextBtn" class="btn btn-secondary">Next →</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="papers-footer">
+    <p><a href="index.html">← Back to Home</a></p>
+    <p>Data sourced from <a href="https://arxiv.org" target="_blank" rel="noopener noreferrer">arXiv</a></p>
+  </footer>
+
+  <script src="js/fetch-papers.js"></script>
+  <script src="js/papers.js"></script>
+</body>
+</html>
