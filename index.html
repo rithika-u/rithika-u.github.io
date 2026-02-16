@@ -1,91 +1,388 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>rithika-u.github.io</title>
-    <style>
-      :root{--accent:#e63946;--bg:#fff;--fg:#111}
-      body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--fg);background:var(--bg);padding:32px}
-      a{color:var(--accent)}
-      header{margin-bottom:24px}
-      .note{margin-top:18px;color:#333}
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>rithika-u.github.io</h1>
-      <p>Project artifacts for the "Pac‑Man Valentine's Special" and arXiv pages.</p>
-    </header>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valentine's Pac-Man & arXiv Papers</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    <main>
-      <section>
-        <h2>Overview</h2>
-        <p>Welcome to my Valentine's Pac-Man Special project! This repository contains two interactive experiences:</p>
-        <ol>
-          <li>💕 <strong>Pac-Man Valentine's Game</strong> — Play directly in your browser with roses, hearts, and ghosts!</li>
-          <li>📚 <strong>Latest Research Papers</strong> — Auto-updating arXiv papers on AI, Machine Learning, and Data Science</li>
-        </ol>
-      </section>
+    :root {
+      --primary: #e94560;
+      --secondary: #f39c12;
+      --dark: #1a1a2e;
+      --light: #f5f5f5;
+      --text: #2c3e50;
+      --border: #ecf0f1;
+    }
 
-      <section>
-        <h2>🎮 Try the Game & Papers</h2>
-        <ul>
-          <li><a href="pacman-valentine.html"><strong>💕 Play Pac-Man Valentine's Special</strong></a> — A love-themed maze adventure</li>
-          <li><a href="papers.html"><strong>📚 Browse Latest Research Papers</strong></a> — Discover cutting-edge research</li>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Navigation */
+    nav {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 80px 20px;
+      text-align: center;
+      color: white;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero p {
+      font-size: 20px;
+      margin-bottom: 40px;
+      opacity: 0.95;
+    }
+
+    /* CTA Buttons */
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+      font-size: 16px;
+    }
+
+    .btn-primary {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid white;
+    }
+
+    .btn-secondary:hover {
+      background: white;
+      color: var(--primary);
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-card h3 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+
+    .feature-card p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .feature-card a {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .feature-card a:hover {
+      color: var(--secondary);
+    }
+
+    .emoji {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    /* Section Title */
+    .section-title {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 50px;
+      color: white;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 4px;
+      background: var(--primary);
+      margin: 15px auto 0;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(0, 0, 0, 0.1);
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      margin-top: 60px;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: white;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--secondary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      .nav-links {
+        gap: 20px;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <a href="#" class="nav-brand">💕 Valentine's Arcade</a>
+      <ul class="nav-links">
+        <li><a href="#game">Game</a></li>
+        <li><a href="#papers">Papers</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h1>🎮 Valentine's Arcade 💕</h1>
+    <p>Interactive games and research discovery platform</p>
+    <div class="cta-buttons">
+      <a href="pacman-valentine.html" class="btn btn-primary">🕹️ Play Pac-Man</a>
+      <a href="papers.html" class="btn btn-primary">📚 Explore Papers</a>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div class="container">
+    <h2 class="section-title" id="game">Featured Experiences</h2>
+
+    <div class="features">
+      <!-- Pac-Man Card -->
+      <div class="feature-card">
+        <span class="emoji">💕</span>
+        <h3>Pac-Man Valentine's</h3>
+        <p>A love-themed maze adventure! Navigate through a spacious board, collect roses for power-ups, and shoot hearts at ghosts. Use arrow keys or WASD to move.</p>
+        <ul style="list-style: none; color: #666; font-size: 14px; line-height: 2;">
+          <li>✨ Beautiful maze-based gameplay</li>
+          <li>🌹 Collect roses for power-ups</li>
+          <li>💕 Shoot hearts at ghosts</li>
+          <li>🎮 Smooth keyboard controls</li>
+          <li>📱 Responsive design</li>
         </ul>
-      </section>
+        <a href="pacman-valentine.html">Start Playing →</a>
+      </div>
 
-      <section>
-        <h2>Project Links</h2>
-        <ul>
-          <li><a href="/plan.md">Project plan (`plan.md`)</a></li>
-          <li><a href="/.github/prompts/prompts.md">Project requirements (`.github/prompts/prompts.md`)</a></li>
-          <li><a href="/.github/agents/">Agent manifests (`.github/agents/`)</a></li>
-          <li><a href="/.github/skills/">Skill descriptors (`.github/skills/`)</a></li>
-          <li><a href="/.github/prompts/coding-standards.md">Coding standards</a></li>
-          <li><a href="/.github/prompts/html-instructions.md">HTML guidelines</a></li>
+      <!-- Papers Card -->
+      <div class="feature-card">
+        <span class="emoji">📚</span>
+        <h3>arXiv Paper Finder</h3>
+        <p>Discover cutting-edge research papers on AI, Machine Learning, and Data Science. Search by keywords, browse abstracts, and access PDFs directly.</p>
+        <ul style="list-style: none; color: #666; font-size: 14px; line-height: 2;">
+          <li>🔍 Powerful keyword search</li>
+          <li>📄 Direct PDF access</li>
+          <li>📊 10+ papers ready to explore</li>
+          <li>⚡ Fast loading</li>
+          <li>🔗 Direct links to arXiv</li>
         </ul>
-      </section>
+        <a href="papers.html">Browse Papers →</a>
+      </div>
 
-      <section>
-        <h2>Agents (summary)</h2>
-        <ul>
-          <li>Product Architect — converts features into prioritized tasks and acceptance criteria</li>
-          <li>Design Agent — maze, sprites, and arXiv layout mockups</li>
-          <li>arXiv Fetcher — designs the data pipeline and Actions outline for nightly updates</li>
-          <li>Implementation Planner — file manifests and Copilot CLI deployment steps</li>
-          <li>HTML Specialist — HTML/CSS/JS style guidance and scaffolding snippets</li>
-          <li>QA Agent — test cases and verification checklists</li>
-          <li>Deployment Agent — Copilot CLI deployment and Actions setup guidance</li>
+      <!-- About Card -->
+      <div class="feature-card">
+        <span class="emoji">🚀</span>
+        <h3>About This Project</h3>
+        <p>Built with HTML5 Canvas, vanilla JavaScript, and GitHub Pages. A showcase of interactive web development combining fun games with academic research discovery.</p>
+        <ul style="list-style: none; color: #666; font-size: 14px; line-height: 2;">
+          <li>💻 Pure JavaScript (no frameworks)</li>
+          <li>🎨 Custom Canvas rendering</li>
+          <li>🌐 Deployed on GitHub Pages</li>
+          <li>♥️ Valentine's themed</li>
+          <li>📱 Mobile friendly</li>
         </ul>
-      </section>
+        <a href="https://github.com/rithika-u/rithika-u.github.io" target="_blank">View on GitHub →</a>
+      </div>
+    </div>
+  </div>
 
-      <section>
-        <h2>Skills (summary)</h2>
-        <ul>
-          <li>Requirements Analysis</li>
-          <li>UX / Maze Design</li>
-          <li>arXiv Data Pipeline Design</li>
-          <li>HTML/CSS/JS Specialist</li>
-          <li>Test Authoring</li>
-          <li>Copilot CLI Orchestration</li>
-        </ul>
-      </section>
+  <!-- How It Works -->
+  <div class="container" id="about">
+    <h2 class="section-title">How It Works</h2>
+    <div class="features">
+      <div class="feature-card">
+        <h3>🎮 Game Controls</h3>
+        <p><strong>Movement:</strong> Arrow Keys or WASD</p>
+        <p><strong>Start:</strong> Press Space or click Start</p>
+        <p><strong>Pause:</strong> Press P</p>
+        <p><strong>Power-up:</strong> Collect roses 🌹 to shoot hearts 💕</p>
+      </div>
 
-      <section>
-        <h2>Notes on current status</h2>
-        <p class="note">✅ The repository now contains a fully functional Pac-Man Valentine's game and arXiv papers page! Both are live and playable on GitHub Pages. The project includes GitHub Actions automation for nightly paper updates.</p>
-      </section>
+      <div class="feature-card">
+        <h3>📚 Paper Search</h3>
+        <p>Type keywords in the search box to filter papers by:</p>
+        <p>• Paper titles</p>
+        <p>• Author names</p>
+        <p>• Abstract content</p>
+        <p>Hit Enter or click Search to find papers!</p>
+      </div>
 
-      <section>
-        <h2>How It Works</h2>
-        <ul>
-          <li><strong>Game Page:</strong> Pure JavaScript with HTML5 Canvas. Play with arrow keys or WASD, use Space to start. Eat roses for temporary heart-shooting power!</li>
-          <li><strong>Papers Page:</strong> Fetches latest arXiv papers client-side with search, filtering, and sorting. Updates hourly when you visit; GitHub Actions auto-updates nightly.</li>
-          <li><strong>Responsive Design:</strong> Both pages work great on desktop and mobile devices.</li>
-        </ul>
-      </section>
-    </main>
-  </body>
+      <div class="feature-card">
+        <h3>💡 Tips & Tricks</h3>
+        <p><strong>Game:</strong> Use the grace period (5 sec) to collect dots before ghosts start moving!</p>
+        <p><strong>Papers:</strong> Search for topics like "neural networks", "machine learning", or "reinforcement learning"</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="pacman-valentine.html">Pac-Man Game</a>
+        <a href="papers.html">Paper Finder</a>
+        <a href="https://github.com/rithika-u/rithika-u.github.io" target="_blank">GitHub</a>
+        <a href="https://arxiv.org" target="_blank">arXiv</a>
+      </div>
+      <p>Made with 💕 for Valentine's Day | © 2026</p>
+    </div>
+  </footer>
+</body>
 </html>
