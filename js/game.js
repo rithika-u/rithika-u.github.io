@@ -1,8 +1,8 @@
-// Pac-Man Valentine's Edition - Easy Mode
-const GRID_SIZE = 15;  // Smaller cells to fit bigger board
-const ROWS = 31;  // Bigger board
+// Pac-Man Game - HW1 Version
+const GRID_SIZE = 15;
+const ROWS = 31;
 const COLS = 31;
-const GHOST_COUNT = 4;  // Back to 4 ghosts - they'll be in corners now
+const GHOST_COUNT = 4;
 const POWER_UP_DURATION = 10;
 
 class Game {
@@ -12,7 +12,7 @@ class Game {
     this.gameRunning = false;
     this.gamePaused = false;
     this.score = 0;
-    this.lives = 5;  // More lives to start
+    this.lives = 5;
     this.level = 1;
     
     this.pacMan = { x: 15, y: 15, direction: 0, nextDirection: 0, mouthOpen: true };
@@ -27,7 +27,7 @@ class Game {
     
     this.frameCount = 0;
     this.gameStartTime = 0;
-    this.graceTime = 300;  // 5 seconds grace period
+    this.graceTime = 300;
     this.gameOverMessage = '';
     this.pelletsRemaining = 0;
     
@@ -83,7 +83,6 @@ class Game {
 
   initGhosts() {
     const ghostColors = ['#FF0000', '#FFB6C1', '#00FFFF', '#FFB347'];
-    // Place ghosts in 4 corners
     const startPositions = [[2, 2], [28, 2], [2, 28], [28, 28]];
     
     for (let i = 0; i < GHOST_COUNT; i++) {
@@ -95,7 +94,7 @@ class Game {
         startY: sy,
         color: ghostColors[i],
         moveCounter: 0,
-        moveDelay: 8,  // Very slow - moves every 8 frames
+        moveDelay: 8,
         direction: 0,
       });
     }
@@ -105,7 +104,7 @@ class Game {
     this.pellets = [];
     for (let y = 1; y < ROWS - 1; y++) {
       for (let x = 1; x < COLS - 1; x++) {
-        if (this.maze[y][x] === 0 && !(x === 9 && (y === 9 || y === 10))) {
+        if (this.maze[y][x] === 0 && !(x === 15 && (y === 14 || y === 15 || y === 16))) {
           this.pellets.push({ x, y, eaten: false });
         }
       }
@@ -151,13 +150,11 @@ class Game {
   updatePacMan() {
     const dirs = [[0, -1], [1, 0], [0, 1], [-1, 0]];
     
-    // Try next direction first
     let [dx, dy] = dirs[this.pacMan.nextDirection];
     let newX = this.pacMan.x + dx;
     let newY = this.pacMan.y + dy;
 
     if (this.isWall(newX, newY)) {
-      // If next direction blocked, try current direction
       [dx, dy] = dirs[this.pacMan.direction];
       newX = this.pacMan.x + dx;
       newY = this.pacMan.y + dy;
@@ -175,7 +172,6 @@ class Game {
   }
 
   updateGhosts() {
-    // Grace period: ghosts don't move for first 5 seconds
     if (this.frameCount - this.gameStartTime < this.graceTime) {
       return;
     }
@@ -185,9 +181,7 @@ class Game {
       if (ghost.moveCounter >= ghost.moveDelay) {
         ghost.moveCounter = 0;
 
-        // Very simple ghost AI: mostly random, rarely chase
         if (Math.random() > 0.95) {
-          // 5% of time: move toward Pac-Man
           const validMoves = this.getValidGhostMoves(ghost);
           if (validMoves.length > 0) {
             const best = validMoves.reduce((prev, curr) => {
@@ -199,7 +193,6 @@ class Game {
             ghost.y = best.y;
           }
         } else {
-          // 95% random movement
           const validMoves = this.getValidGhostMoves(ghost);
           if (validMoves.length > 0) {
             const move = validMoves[Math.floor(Math.random() * validMoves.length)];
@@ -255,7 +248,6 @@ class Game {
       }
     }
 
-    // Spawn power-ups frequently
     if (Math.random() < 0.005 && this.powerUps.length < 3) {
       const x = Math.floor(Math.random() * (COLS - 2)) + 1;
       const y = Math.floor(Math.random() * (ROWS - 2)) + 1;
@@ -266,7 +258,6 @@ class Game {
   }
 
   checkCollisions() {
-    // Check power-up collision
     for (let i = this.powerUps.length - 1; i >= 0; i--) {
       if (this.pacMan.x === this.powerUps[i].x && this.pacMan.y === this.powerUps[i].y) {
         this.powerUps.splice(i, 1);
@@ -277,7 +268,6 @@ class Game {
       }
     }
 
-    // Check pellet collision
     for (let pellet of this.pellets) {
       if (!pellet.eaten && this.pacMan.x === pellet.x && this.pacMan.y === pellet.y) {
         pellet.eaten = true;
@@ -287,7 +277,6 @@ class Game {
       }
     }
 
-    // Check projectile-ghost collision
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const proj = this.projectiles[i];
       for (let j = this.ghosts.length - 1; j >= 0; j--) {
@@ -303,7 +292,6 @@ class Game {
       }
     }
 
-    // Check ghost collision
     for (let ghost of this.ghosts) {
       if (this.pacMan.x === ghost.x && this.pacMan.y === ghost.y) {
         if (this.powerUpActive) {
@@ -406,7 +394,7 @@ class Game {
         const secondsLeft = Math.ceil((this.graceTime - timeIntoGame) / 60);
         status.innerHTML = `<p style="color: #4CAF50;">✨ Ready in <strong>${secondsLeft}</strong>s - Collect dots! Pellets left: <strong>${this.pelletsRemaining}</strong></p>`;
       } else {
-        status.innerHTML = `<p>Collect dots! Avoid the ghost! Pellets left: <strong>${this.pelletsRemaining}</strong></p>`;
+        status.innerHTML = `<p>Collect dots! Avoid ghosts! Pellets left: <strong>${this.pelletsRemaining}</strong></p>`;
       }
     }
 
@@ -424,11 +412,9 @@ class Game {
     const ctx = this.ctx;
     const cellSize = GRID_SIZE;
 
-    // Clear canvas
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw maze
     ctx.fillStyle = '#0066cc';
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
@@ -438,7 +424,6 @@ class Game {
       }
     }
 
-    // Draw pellets
     ctx.fillStyle = '#ffb6c1';
     for (let pellet of this.pellets) {
       if (!pellet.eaten) {
@@ -448,7 +433,6 @@ class Game {
       }
     }
 
-    // Draw power-ups
     ctx.fillStyle = '#FFD700';
     for (let powerUp of this.powerUps) {
       ctx.beginPath();
@@ -456,7 +440,6 @@ class Game {
       ctx.fill();
     }
 
-    // Draw Pac-Man
     ctx.fillStyle = '#FFFF00';
     const mouthAngle = this.pacMan.mouthOpen ? 0.3 : 0.1;
     const directions = [Math.PI * 1.5, 0, Math.PI * 0.5, Math.PI];
@@ -473,18 +456,15 @@ class Game {
     ctx.lineTo(this.pacMan.x * cellSize + cellSize / 2, this.pacMan.y * cellSize + cellSize / 2);
     ctx.fill();
 
-    // Draw ghosts
     for (let ghost of this.ghosts) {
       ctx.fillStyle = ghost.color;
       ctx.fillRect(ghost.x * cellSize + 2, ghost.y * cellSize + 2, cellSize - 4, cellSize - 4);
       
-      // Ghost eyes
       ctx.fillStyle = 'white';
       ctx.fillRect(ghost.x * cellSize + 4, ghost.y * cellSize + 4, 3, 3);
       ctx.fillRect(ghost.x * cellSize + cellSize - 7, ghost.y * cellSize + 4, 3, 3);
     }
 
-    // Draw projectiles (hearts)
     ctx.fillStyle = '#FF1493';
     for (let proj of this.projectiles) {
       ctx.beginPath();
@@ -494,7 +474,6 @@ class Game {
   }
 }
 
-// Game initialization
 let game;
 const canvas = document.getElementById('gameCanvas');
 game = new Game(canvas);
