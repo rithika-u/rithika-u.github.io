@@ -110,6 +110,17 @@ class Game {
       }
     }
     this.pelletsRemaining = this.pellets.filter(p => !p.eaten).length;
+    
+    // Spawn initial roses
+    this.powerUps = [];
+    for (let i = 0; i < 5; i++) {
+      let x, y;
+      do {
+        x = Math.floor(Math.random() * (COLS - 4)) + 2;
+        y = Math.floor(Math.random() * (ROWS - 4)) + 2;
+      } while (this.isWall(x, y) || (x === 15 && y === 15));
+      this.powerUps.push({ x, y });
+    }
   }
 
   setupKeyListeners() {
@@ -248,10 +259,17 @@ class Game {
       }
     }
 
-    if (Math.random() < 0.005 && this.powerUps.length < 3) {
-      const x = Math.floor(Math.random() * (COLS - 2)) + 1;
-      const y = Math.floor(Math.random() * (ROWS - 2)) + 1;
-      if (!this.isWall(x, y) && !(x === this.pacMan.x && y === this.pacMan.y)) {
+    // Spawn power-ups more frequently
+    if (Math.random() < 0.02 && this.powerUps.length < 5) {
+      let x, y;
+      let attempts = 0;
+      do {
+        x = Math.floor(Math.random() * (COLS - 4)) + 2;
+        y = Math.floor(Math.random() * (ROWS - 4)) + 2;
+        attempts++;
+      } while (this.isWall(x, y) && attempts < 10);
+      
+      if (!this.isWall(x, y)) {
         this.powerUps.push({ x, y });
       }
     }
