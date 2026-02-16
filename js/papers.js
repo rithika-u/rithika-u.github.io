@@ -13,7 +13,16 @@ class PapersPage {
 
   async init() {
     this.showLoading();
-    this.allPapers = await fetchArXivPapers(this.selectedCategories);
+    let papers = await fetchArXivPapers(this.selectedCategories);
+    
+    // Convert published dates from strings to Date objects
+    papers = papers.map(paper => ({
+      ...paper,
+      published: new Date(paper.published),
+      abstract: paper.abstract || paper.summary || ''
+    }));
+    
+    this.allPapers = papers;
     
     if (this.allPapers.length === 0) {
       this.showError();
@@ -153,19 +162,23 @@ class PapersPage {
       day: 'numeric',
     });
 
-    const abstract = paper.summary.length > 300 
-      ? paper.summary.substring(0, 300) + '...' 
-      : paper.summary;
+    const abstract = paper.abstract.length > 300 
+      ? paper.abstract.substring(0, 300) + '...' 
+      : paper.abstract;
+
+    const arXivUrl = paper.url || `https://arxiv.org/abs/${paper.id}`;
+    const pdfUrl = paper.pdf_link || paper.pdfUrl || `https://arxiv.org/pdf/${paper.id}.pdf`;
+    const paperId = paper.id || paper.title.substring(0, 10);
 
     return `
-      <article class="paper-card" role="article" aria-labelledby="paper-${paper.id}-title">
+      <article class="paper-card" role="article" aria-labelledby="paper-${paperId}-title">
         <div class="paper-card__header">
-          <h3 id="paper-${paper.id}-title" class="paper-card__title">
-            <a href="${paper.url}" target="_blank" rel="noopener noreferrer">
+          <h3 id="paper-${paperId}-title" class="paper-card__title">
+            <a href="${arXivUrl}" target="_blank" rel="noopener noreferrer">
               ${this.escapeHtml(paper.title)}
             </a>
           </h3>
-          <span class="paper-card__arxiv-id">${paper.id}</span>
+          <span class="paper-card__arxiv-id">${paperId}</span>
         </div>
 
         <div class="paper-card__metadata">
@@ -178,18 +191,15 @@ class PapersPage {
               ${formattedDate}
             </time>
           </div>
-          <div class="paper-card__categories">
-            <span class="category-tag">${paper.category}</span>
-          </div>
         </div>
 
         <p class="paper-card__abstract">${this.escapeHtml(abstract)}</p>
 
         <div class="paper-card__actions">
-          <a href="${paper.pdfUrl}" class="btn btn-pdf" target="_blank" rel="noopener noreferrer">
+          <a href="${pdfUrl}" class="btn btn-pdf" target="_blank" rel="noopener noreferrer">
             📄 View PDF
           </a>
-          <a href="${paper.url}" class="btn btn-arxiv" target="_blank" rel="noopener noreferrer">
+          <a href="${arXivUrl}" class="btn btn-arxiv" target="_blank" rel="noopener noreferrer">
             🔗 View on arXiv
           </a>
         </div>
