@@ -6,6 +6,18 @@
   <meta name="description" content="Latest Research Papers from arXiv">
   <title>📚 Latest Research Papers</title>
   <link rel="stylesheet" href="css/papers.css">
+  <style>
+    body { font-family: system-ui, sans-serif; }
+    .paper { border-bottom: 1px solid #eee; padding: 16px 0; margin: 16px 0; }
+    .paper-title { font-weight: 600; margin-bottom: 8px; }
+    .paper-title a { text-decoration: none; color: #e94560; }
+    .paper-title a:hover { text-decoration: underline; }
+    .paper-meta { font-size: 14px; color: #666; margin-bottom: 8px; }
+    .paper-abstract { margin: 12px 0; line-height: 1.5; }
+    .paper-links { margin-top: 12px; }
+    .paper-links a { margin-right: 16px; display: inline-block; }
+    #lastUpdate { font-weight: 600; color: #e94560; }
+  </style>
 </head>
 <body>
   <header class="papers-header">
@@ -14,89 +26,91 @@
     <p class="updated-at">Last updated: <span id="lastUpdate">Loading...</span></p>
   </header>
 
-  <main class="papers-wrapper">
-    <aside class="papers-filters">
-      <div class="filter-group">
-        <h3>Search</h3>
-        <input 
-          type="text" 
-          id="searchInput" 
-          class="search-input"
-          placeholder="Enter keywords..."
-          aria-describedby="searchHint"
-        >
-        <small id="searchHint">Searches titles, authors, and abstracts</small>
-      </div>
-
-      <div class="filter-group">
-        <h3>Categories</h3>
-        <div id="categoryFilters" class="category-list">
-          <label class="category-option">
-            <input type="checkbox" class="category-checkbox" value="cs.AI" checked>
-            AI
-          </label>
-          <label class="category-option">
-            <input type="checkbox" class="category-checkbox" value="cs.LG" checked>
-            Machine Learning
-          </label>
-          <label class="category-option">
-            <input type="checkbox" class="category-checkbox" value="stat.ML" checked>
-            Statistics ML
-          </label>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <h3>Sort By</h3>
-        <select id="sortSelect" class="sort-select">
-          <option value="date-desc">Newest First</option>
-          <option value="date-asc">Oldest First</option>
-          <option value="title">Title (A-Z)</option>
-        </select>
-      </div>
-
-      <button id="clearFilters" class="btn btn-secondary">Clear Filters</button>
-    </aside>
-
-    <section class="papers-container">
-      <!-- Loading state -->
-      <div id="loadingState" class="state-message loading" style="display: none;">
-        <div class="spinner"></div>
-        <p>Loading papers...</p>
-      </div>
-
-      <!-- Error state -->
-      <div id="errorState" class="state-message error" style="display: none;">
-        <p>⚠️ Unable to load papers. Please refresh or try again later.</p>
-        <button onclick="location.reload()" class="btn btn-primary">Refresh Page</button>
-      </div>
-
-      <!-- Empty state -->
-      <div id="emptyState" class="state-message empty" style="display: none;">
-        <p>No papers found matching your filters.</p>
-        <button id="resetFiltersBtn" class="btn btn-secondary">Reset Filters</button>
-      </div>
-
-      <!-- Papers grid -->
-      <div id="papersList" class="papers-grid" role="feed" aria-label="Research papers">
-        <!-- Paper cards populated here -->
-      </div>
-
-      <!-- Pagination -->
-      <div id="paginationContainer" class="pagination" style="display: none;">
-        <button id="prevBtn" class="btn btn-secondary" disabled>← Previous</button>
-        <span id="pageInfo" class="page-info">Page 1</span>
-        <button id="nextBtn" class="btn btn-secondary">Next →</button>
-      </div>
-    </section>
+  <main style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <div id="status" style="padding: 12px; background: #f0f0f0; border-radius: 4px; margin-bottom: 20px;">
+      Loading papers...
+    </div>
+    <div id="papers"></div>
   </main>
 
-  <footer class="papers-footer">
+  <footer style="text-align: center; padding: 20px; border-top: 1px solid #eee; margin-top: 40px;">
     <p><a href="index.html">← Back to Home</a></p>
     <p>Data sourced from <a href="https://arxiv.org" target="_blank" rel="noopener noreferrer">arXiv</a></p>
   </footer>
 
-  <script src="js/fetch-papers.js"></script>
-  <script src="js/papers.js"></script>
+  <script>
+    async function loadPapers() {
+      try {
+        console.log('Fetching papers...');
+        const response = await fetch('/data/arxiv.json', { cache: 'no-store' });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const papers = await response.json();
+        console.log(`Loaded ${papers.length} papers`);
+        
+        if (!Array.isArray(papers) || papers.length === 0) {
+          document.getElementById('status').innerHTML = '<p style="color: red;">❌ No papers found</p>';
+          document.getElementById('lastUpdate').textContent = 'Unknown';
+          return;
+        }
+        
+        // Update timestamp
+        const now = new Date();
+        document.getElementById('lastUpdate').textContent = now.toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        // Display papers
+        const container = document.getElementById('papers');
+        container.innerHTML = papers.map(paper => `
+          <div class="paper">
+            <div class="paper-title">
+              <a href="https://arxiv.org/abs/${paper.id || paper.title.substring(0, 10)}" target="_blank" rel="noopener noreferrer">
+                ${escapeHtml(paper.title)}
+              </a>
+            </div>
+            <div class="paper-meta">
+              <strong>Authors:</strong> ${escapeHtml(paper.authors.slice(0, 3).join(', '))}${paper.authors.length > 3 ? ' et al.' : ''}
+              <br>
+              <strong>Published:</strong> ${new Date(paper.published).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+            </div>
+            <div class="paper-abstract">
+              ${escapeHtml((paper.abstract || paper.summary || '').substring(0, 400))}...
+            </div>
+            <div class="paper-links">
+              <a href="${paper.pdf_link || '#'}" target="_blank" rel="noopener noreferrer">📄 View PDF</a>
+              <a href="https://arxiv.org/abs/${paper.id || paper.title.substring(0, 10)}" target="_blank" rel="noopener noreferrer">🔗 View on arXiv</a>
+            </div>
+          </div>
+        `).join('');
+        
+        document.getElementById('status').innerHTML = `<p style="color: green;">✅ Displaying ${papers.length} papers</p>`;
+      } catch (error) {
+        console.error('Failed to load papers:', error);
+        document.getElementById('status').innerHTML = `<p style="color: red;">❌ Error loading papers: ${error.message}</p>`;
+        document.getElementById('lastUpdate').textContent = 'Error';
+      }
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // Load papers when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadPapers);
+    } else {
+      loadPapers();
+    }
+  </script>
 </body>
 </html>

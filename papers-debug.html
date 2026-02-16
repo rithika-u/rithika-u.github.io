@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📚 Latest Research Papers - Debug</title>
+  <link rel="stylesheet" href="css/papers.css">
+</head>
+<body>
+  <header class="papers-header">
+    <h1>📚 Latest Research Papers (DEBUG)</h1>
+    <p class="header-subtitle">Testing paper loading...</p>
+  </header>
+
+  <main class="papers-wrapper">
+    <section class="papers-container" style="width: 100%;">
+      <div id="debugOutput" style="padding: 20px; white-space: pre-wrap; font-family: monospace; background: #f0f0f0;"></div>
+      <div id="papersList" class="papers-grid"></div>
+    </section>
+  </main>
+
+  <script>
+    async function loadPapers() {
+      const debug = document.getElementById('debugOutput');
+      
+      debug.innerHTML += 'Starting load...\n';
+      
+      try {
+        debug.innerHTML += 'Fetching /data/arxiv.json...\n';
+        const response = await fetch('/data/arxiv.json');
+        debug.innerHTML += `Response status: ${response.status}\n`;
+        
+        if (!response.ok) throw new Error('Response not OK');
+        
+        const papers = await response.json();
+        debug.innerHTML += `✅ Loaded ${papers.length} papers!\n`;
+        
+        if (!Array.isArray(papers)) {
+          throw new Error('Data is not an array');
+        }
+        
+        // Display papers
+        const container = document.getElementById('papersList');
+        papers.forEach((paper, i) => {
+          const div = document.createElement('div');
+          div.style.padding = '15px';
+          div.style.border = '1px solid #ddd';
+          div.style.marginBottom = '10px';
+          div.innerHTML = `
+            <h3>${paper.title}</h3>
+            <p><strong>Authors:</strong> ${paper.authors.join(', ')}</p>
+            <p><strong>Published:</strong> ${paper.published}</p>
+            <p>${(paper.abstract || '').substring(0, 200)}...</p>
+            <a href="${paper.pdf_link}" target="_blank">📄 PDF</a>
+          `;
+          container.appendChild(div);
+        });
+        
+        debug.innerHTML += `✅ Displayed ${papers.length} papers on page!\n`;
+      } catch (error) {
+        debug.innerHTML += `❌ ERROR: ${error.message}\n${error.stack}\n`;
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadPapers);
+    // Also try immediately in case DOMContentLoaded already fired
+    if (document.readyState === 'loading') {
+      // Wait for DOMContentLoaded
+    } else {
+      loadPapers();
+    }
+  </script>
+</body>
+</html>
