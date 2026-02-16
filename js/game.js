@@ -1,7 +1,7 @@
 const GRID_SIZE = 20;
 const ROWS = 21;
 const COLS = 19;
-const GHOST_COUNT = 4;
+const GHOST_COUNT = 2;
 const POWER_UP_DURATION = 10;
 
 class Game {
@@ -25,6 +25,8 @@ class Game {
     this.powerUpTime = 0;
     
     this.frameCount = 0;
+    this.gameStartTime = 0;
+    this.graceTime = 180;  // 3 seconds at 60fps
     this.gameOverMessage = '';
     this.pelletsRemaining = 0;
     
@@ -66,8 +68,8 @@ class Game {
   }
 
   initGhosts() {
-    const ghostColors = ['#FF0000', '#FFB6C1', '#00FFFF', '#FFB347'];
-    const startPositions = [[8, 9], [9, 9], [8, 10], [9, 10]];
+    const ghostColors = ['#FF0000', '#FFB6C1'];
+    const startPositions = [[8, 9], [9, 10]];
     
     for (let i = 0; i < GHOST_COUNT; i++) {
       const [sx, sy] = startPositions[i];
@@ -78,7 +80,7 @@ class Game {
         startY: sy,
         color: ghostColors[i],
         moveCounter: 0,
-        moveDelay: 3 + i,
+        moveDelay: 5 + i * 2,  // Slower movement - was 3 + i
         direction: Math.floor(Math.random() * 4),
         scatterMode: true,
         scatterCounter: 0,
@@ -161,17 +163,21 @@ class Game {
   }
 
   updateGhosts() {
+    // Grace period: ghosts don't move for first 3 seconds
+    if (this.frameCount - this.gameStartTime < this.graceTime) {
+      return;
+    }
+
     for (let ghost of this.ghosts) {
       ghost.moveCounter++;
       if (ghost.moveCounter >= ghost.moveDelay) {
         ghost.moveCounter = 0;
 
-        // Simple ghost AI: chase Pac-Man with some randomness
-        if (Math.random() > 0.1) {
-          // 90% of the time: try to move toward Pac-Man
+        // Ghost AI: 40% of the time chase, 60% random movement (much less aggressive)
+        if (Math.random() > 0.6) {
+          // Chase Pac-Man
           const validMoves = this.getValidGhostMoves(ghost);
           if (validMoves.length > 0) {
-            // Choose move closest to Pac-Man
             const best = validMoves.reduce((prev, curr) => {
               const prevDist = Math.hypot(prev.x - this.pacMan.x, prev.y - this.pacMan.y);
               const currDist = Math.hypot(curr.x - this.pacMan.x, curr.y - this.pacMan.y);
@@ -181,7 +187,7 @@ class Game {
             ghost.y = best.y;
           }
         } else {
-          // 10% random movement
+          // Random movement (less predictable, easier to escape)
           const validMoves = this.getValidGhostMoves(ghost);
           if (validMoves.length > 0) {
             const move = validMoves[Math.floor(Math.random() * validMoves.length)];
@@ -327,6 +333,7 @@ class Game {
   start() {
     this.gameRunning = true;
     this.gamePaused = false;
+    this.gameStartTime = this.frameCount;
     this.updateUI();
   }
 
@@ -382,7 +389,13 @@ class Game {
     } else if (this.gamePaused) {
       status.innerHTML = '<p style="color: #f39c12;">⏸ PAUSED - Press <strong>P</strong> to resume</p>';
     } else {
-      status.innerHTML = `<p>Collect dots! Avoid ghosts! Pellets left: <strong>${this.pelletsRemaining}</strong></p>`;
+      const timeIntoGame = this.frameCount - this.gameStartTime;
+      if (timeIntoGame < this.graceTime) {
+        const secondsLeft = Math.ceil((this.graceTime - timeIntoGame) / 60);
+        status.innerHTML = `<p style="color: #4CAF50;">✨ Ready in <strong>${secondsLeft}</strong>s - Collect dots! Pellets left: <strong>${this.pelletsRemaining}</strong></p>`;
+      } else {
+        status.innerHTML = `<p>Collect dots! Avoid ghosts! Pellets left: <strong>${this.pelletsRemaining}</strong></p>`;
+      }
     }
 
     if (this.powerUpActive) {
