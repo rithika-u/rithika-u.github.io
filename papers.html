@@ -8,6 +8,88 @@
   <link rel="stylesheet" href="css/papers.css">
   <style>
     body { font-family: system-ui, sans-serif; }
+    
+    .search-section {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .search-section h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #333;
+    }
+    
+    .search-input-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    #searchInput {
+      flex: 1;
+      min-width: 250px;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      transition: border-color 0.2s;
+    }
+    
+    #searchInput:focus {
+      outline: none;
+      border-color: #e94560;
+      box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+    }
+    
+    .search-button {
+      padding: 10px 20px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    
+    .search-button:hover {
+      background: #d63449;
+    }
+    
+    .search-button:active {
+      transform: scale(0.98);
+    }
+    
+    .reset-button {
+      padding: 10px 20px;
+      background: #999;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    
+    .reset-button:hover {
+      background: #777;
+    }
+    
+    .results-info {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    
+    .results-info strong {
+      color: #e94560;
+    }
+    
     .paper { border-bottom: 1px solid #eee; padding: 16px 0; margin: 16px 0; }
     .paper-title { font-weight: 600; margin-bottom: 8px; }
     .paper-title a { text-decoration: none; color: #e94560; }
@@ -17,6 +99,23 @@
     .paper-links { margin-top: 12px; }
     .paper-links a { margin-right: 16px; display: inline-block; }
     #lastUpdate { font-weight: 600; color: #e94560; }
+    
+    .highlight {
+      background-color: #fff3cd;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-weight: 600;
+    }
+    
+    .no-results {
+      padding: 40px 20px;
+      text-align: center;
+      color: #999;
+    }
+    
+    .no-results p {
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -27,6 +126,20 @@
   </header>
 
   <main style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <div class="search-section">
+      <h2>🔍 Search Papers</h2>
+      <div class="search-input-group">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search by keywords (e.g., neural networks, deep learning, reinforcement learning)..."
+        >
+        <button class="search-button" onclick="performSearch()">Search</button>
+        <button class="reset-button" onclick="resetSearch()">Reset</button>
+      </div>
+      <div class="results-info" id="resultsInfo"></div>
+    </div>
+
     <div id="status" style="padding: 12px; background: #f0f0f0; border-radius: 4px; margin-bottom: 20px;">
       Loading papers...
     </div>
@@ -39,6 +152,9 @@
   </footer>
 
   <script>
+    let allPapers = [];
+    let filteredPapers = [];
+
     async function loadPapers() {
       try {
         console.log('Fetching papers...');
@@ -48,10 +164,11 @@
           throw new Error(`HTTP ${response.status}`);
         }
         
-        const papers = await response.json();
-        console.log(`Loaded ${papers.length} papers`);
+        allPapers = await response.json();
+        filteredPapers = [...allPapers];
+        console.log(`Loaded ${allPapers.length} papers`);
         
-        if (!Array.isArray(papers) || papers.length === 0) {
+        if (!Array.isArray(allPapers) || allPapers.length === 0) {
           document.getElementById('status').innerHTML = '<p style="color: red;">❌ No papers found</p>';
           document.getElementById('lastUpdate').textContent = 'Unknown';
           return;
@@ -67,36 +184,91 @@
           minute: '2-digit'
         });
         
-        // Display papers
-        const container = document.getElementById('papers');
-        container.innerHTML = papers.map(paper => `
-          <div class="paper">
-            <div class="paper-title">
-              <a href="https://arxiv.org/abs/${paper.id || paper.title.substring(0, 10)}" target="_blank" rel="noopener noreferrer">
-                ${escapeHtml(paper.title)}
-              </a>
-            </div>
-            <div class="paper-meta">
-              <strong>Authors:</strong> ${escapeHtml(paper.authors.slice(0, 3).join(', '))}${paper.authors.length > 3 ? ' et al.' : ''}
-              <br>
-              <strong>Published:</strong> ${new Date(paper.published).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-            </div>
-            <div class="paper-abstract">
-              ${escapeHtml((paper.abstract || paper.summary || '').substring(0, 400))}...
-            </div>
-            <div class="paper-links">
-              <a href="${paper.pdf_link || '#'}" target="_blank" rel="noopener noreferrer">📄 View PDF</a>
-              <a href="https://arxiv.org/abs/${paper.id || paper.title.substring(0, 10)}" target="_blank" rel="noopener noreferrer">🔗 View on arXiv</a>
-            </div>
-          </div>
-        `).join('');
+        displayPapers();
+        document.getElementById('status').innerHTML = `<p style="color: green;">✅ Loaded ${allPapers.length} papers</p>`;
         
-        document.getElementById('status').innerHTML = `<p style="color: green;">✅ Displaying ${papers.length} papers</p>`;
+        // Allow search by Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            performSearch();
+          }
+        });
       } catch (error) {
         console.error('Failed to load papers:', error);
         document.getElementById('status').innerHTML = `<p style="color: red;">❌ Error loading papers: ${error.message}</p>`;
         document.getElementById('lastUpdate').textContent = 'Error';
       }
+    }
+
+    function performSearch() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+      
+      if (!searchTerm) {
+        resetSearch();
+        return;
+      }
+      
+      filteredPapers = allPapers.filter(paper => {
+        const title = (paper.title || '').toLowerCase();
+        const authors = (paper.authors || []).map(a => a.toLowerCase()).join(' ');
+        const abstract = (paper.abstract || '').toLowerCase();
+        
+        return title.includes(searchTerm) || 
+               authors.includes(searchTerm) || 
+               abstract.includes(searchTerm);
+      });
+      
+      displayPapers();
+      
+      const info = document.getElementById('resultsInfo');
+      if (filteredPapers.length === 0) {
+        info.innerHTML = `<p>No papers found for "<strong>${escapeHtml(searchTerm)}</strong>"</p>`;
+      } else {
+        info.innerHTML = `<p>Found <strong>${filteredPapers.length}</strong> paper${filteredPapers.length !== 1 ? 's' : ''} matching "<strong>${escapeHtml(searchTerm)}</strong>"</p>`;
+      }
+    }
+
+    function resetSearch() {
+      document.getElementById('searchInput').value = '';
+      filteredPapers = [...allPapers];
+      displayPapers();
+      document.getElementById('resultsInfo').innerHTML = '';
+    }
+
+    function displayPapers() {
+      const container = document.getElementById('papers');
+      
+      if (filteredPapers.length === 0) {
+        container.innerHTML = `
+          <div class="no-results">
+            <p>😔 No papers found</p>
+            <p style="font-size: 14px;">Try adjusting your search terms</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = filteredPapers.map(paper => `
+        <div class="paper">
+          <div class="paper-title">
+            <a href="https://arxiv.org/abs/${paper.id || paper.title.substring(0, 10)}" target="_blank" rel="noopener noreferrer">
+              ${escapeHtml(paper.title)}
+            </a>
+          </div>
+          <div class="paper-meta">
+            <strong>Authors:</strong> ${escapeHtml(paper.authors.slice(0, 3).join(', '))}${paper.authors.length > 3 ? ' et al.' : ''}
+            <br>
+            <strong>Published:</strong> ${new Date(paper.published).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+          </div>
+          <div class="paper-abstract">
+            ${escapeHtml((paper.abstract || paper.summary || '').substring(0, 400))}...
+          </div>
+          <div class="paper-links">
+            <a href="${paper.pdf_link || '#'}" target="_blank" rel="noopener noreferrer">📄 View PDF</a>
+            <a href="https://arxiv.org/abs/${paper.id || paper.title.substring(0, 10)}" target="_blank" rel="noopener noreferrer">🔗 View on arXiv</a>
+          </div>
+        </div>
+      `).join('');
     }
     
     function escapeHtml(text) {
