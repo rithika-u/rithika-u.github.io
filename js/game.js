@@ -1,7 +1,8 @@
-const GRID_SIZE = 20;
-const ROWS = 21;
-const COLS = 19;
-const GHOST_COUNT = 2;
+// Pac-Man Valentine's Edition - Easy Mode
+const GRID_SIZE = 15;  // Smaller cells to fit bigger board
+const ROWS = 31;  // Bigger board
+const COLS = 31;
+const GHOST_COUNT = 4;  // Back to 4 ghosts - they'll be in corners now
 const POWER_UP_DURATION = 10;
 
 class Game {
@@ -11,10 +12,10 @@ class Game {
     this.gameRunning = false;
     this.gamePaused = false;
     this.score = 0;
-    this.lives = 3;
+    this.lives = 5;  // More lives to start
     this.level = 1;
     
-    this.pacMan = { x: 9, y: 15, direction: 0, nextDirection: 0, mouthOpen: true };
+    this.pacMan = { x: 15, y: 15, direction: 0, nextDirection: 0, mouthOpen: true };
     this.ghosts = [];
     this.pellets = [];
     this.powerUps = [];
@@ -26,7 +27,7 @@ class Game {
     
     this.frameCount = 0;
     this.gameStartTime = 0;
-    this.graceTime = 180;  // 3 seconds at 60fps
+    this.graceTime = 300;  // 5 seconds grace period
     this.gameOverMessage = '';
     this.pelletsRemaining = 0;
     
@@ -37,25 +38,38 @@ class Game {
   }
 
   initMaze() {
-    // Classic Pac-Man style maze
     const mazePattern = [
-      "###################",
-      "#......#......#...#",
-      "#.##.###.####.###.#",
-      "#.#.......#....#..#",
-      "#.###.###.#.####.##",
-      "#...#.#...#.#......#",
-      "###.#.#.###.#.#####",
-      "#...........#.....#",
-      "#.###.#####.#.#####",
-      "#.#...#...#...#...#",
-      "#.#.###.#.#####.#.#",
-      "#.....#.#.......#.#",
-      "#####.#.#.#####.#.#",
-      "#.....#...#.....#.#",
-      "#.#######.#######.#",
-      "#.................#",
-      "###################"
+      "###############################",
+      "#.....#.......#.......#.....#",
+      "#.###.#.#####.#.#####.#.###.#",
+      "#.#...#.#.....#.....#.#...#.#",
+      "#.#.###.#.#########.#.###.#.#",
+      "#.#.#...#.#.......#.#.#...#.#",
+      "#.#.#.###.#.#####.#.#.#.###.#",
+      "#...#.....#.#...#.#.#.......#",
+      "#.#########.#.#.#.#.#########",
+      "#.#...........#.#...........#",
+      "#.#.#########.#.#########.#.#",
+      "#...#.......#...#.......#...#",
+      "#.###.#####.....#####.#.###.#",
+      "#.#...#.......#.......#.#...#",
+      "#.#.###.#####.#.#####.#.#.###",
+      "#...#...#.....#.....#...#...#",
+      "#####.#.#.###.#.###.#.#.#####",
+      "#.....#.#.....#.....#.#.....#",
+      "#.#########.###.#########.#.#",
+      "#.#.......#.....#.......#.#.#",
+      "#.#.#####.#.###.#.#####.#.#.#",
+      "#...#...#.#...#.#...#...#...#",
+      "#.###.#.#.###.#.###.#.#.###.#",
+      "#.#...#.#.....#.....#.#...#.#",
+      "#.#.###.#.#########.#.###.#.#",
+      "#.#.....#.....#.....#.....#.#",
+      "#.#################.#######.#",
+      "#.....................#.....#",
+      "#.#########################.#",
+      "#.......................#...#",
+      "###############################"
     ];
 
     this.maze = [];
@@ -68,8 +82,9 @@ class Game {
   }
 
   initGhosts() {
-    const ghostColors = ['#FF0000', '#FFB6C1'];
-    const startPositions = [[8, 9], [9, 10]];
+    const ghostColors = ['#FF0000', '#FFB6C1', '#00FFFF', '#FFB347'];
+    // Place ghosts in 4 corners
+    const startPositions = [[2, 2], [28, 2], [2, 28], [28, 28]];
     
     for (let i = 0; i < GHOST_COUNT; i++) {
       const [sx, sy] = startPositions[i];
@@ -80,10 +95,8 @@ class Game {
         startY: sy,
         color: ghostColors[i],
         moveCounter: 0,
-        moveDelay: 5 + i * 2,  // Slower movement - was 3 + i
-        direction: Math.floor(Math.random() * 4),
-        scatterMode: true,
-        scatterCounter: 0,
+        moveDelay: 8,  // Very slow - moves every 8 frames
+        direction: 0,
       });
     }
   }
@@ -126,7 +139,6 @@ class Game {
   update() {
     if (!this.gameRunning || this.gamePaused) return;
 
-    // Try to move Pac-Man in desired direction, fall back to current direction
     this.updatePacMan();
     this.updateGhosts();
     this.updateProjectiles();
@@ -163,7 +175,7 @@ class Game {
   }
 
   updateGhosts() {
-    // Grace period: ghosts don't move for first 3 seconds
+    // Grace period: ghosts don't move for first 5 seconds
     if (this.frameCount - this.gameStartTime < this.graceTime) {
       return;
     }
@@ -173,9 +185,9 @@ class Game {
       if (ghost.moveCounter >= ghost.moveDelay) {
         ghost.moveCounter = 0;
 
-        // Ghost AI: 40% of the time chase, 60% random movement (much less aggressive)
-        if (Math.random() > 0.6) {
-          // Chase Pac-Man
+        // Very simple ghost AI: mostly random, rarely chase
+        if (Math.random() > 0.95) {
+          // 5% of time: move toward Pac-Man
           const validMoves = this.getValidGhostMoves(ghost);
           if (validMoves.length > 0) {
             const best = validMoves.reduce((prev, curr) => {
@@ -187,7 +199,7 @@ class Game {
             ghost.y = best.y;
           }
         } else {
-          // Random movement (less predictable, easier to escape)
+          // 95% random movement
           const validMoves = this.getValidGhostMoves(ghost);
           if (validMoves.length > 0) {
             const move = validMoves[Math.floor(Math.random() * validMoves.length)];
@@ -243,8 +255,8 @@ class Game {
       }
     }
 
-    // Spawn power-ups randomly
-    if (Math.random() < 0.002 && this.powerUps.length < 2) {
+    // Spawn power-ups frequently
+    if (Math.random() < 0.005 && this.powerUps.length < 3) {
       const x = Math.floor(Math.random() * (COLS - 2)) + 1;
       const y = Math.floor(Math.random() * (ROWS - 2)) + 1;
       if (!this.isWall(x, y) && !(x === this.pacMan.x && y === this.pacMan.y)) {
@@ -324,7 +336,7 @@ class Game {
   }
 
   resetPacMan() {
-    this.pacMan.x = 9;
+    this.pacMan.x = 15;
     this.pacMan.y = 15;
     this.pacMan.direction = 0;
     this.pacMan.nextDirection = 0;
@@ -354,7 +366,7 @@ class Game {
     this.gameRunning = false;
     this.gamePaused = false;
     this.score = 0;
-    this.lives = 3;
+    this.lives = 5;
     this.level = 1;
     this.frameCount = 0;
     this.gameOverMessage = '';
@@ -394,7 +406,7 @@ class Game {
         const secondsLeft = Math.ceil((this.graceTime - timeIntoGame) / 60);
         status.innerHTML = `<p style="color: #4CAF50;">✨ Ready in <strong>${secondsLeft}</strong>s - Collect dots! Pellets left: <strong>${this.pelletsRemaining}</strong></p>`;
       } else {
-        status.innerHTML = `<p>Collect dots! Avoid ghosts! Pellets left: <strong>${this.pelletsRemaining}</strong></p>`;
+        status.innerHTML = `<p>Collect dots! Avoid the ghost! Pellets left: <strong>${this.pelletsRemaining}</strong></p>`;
       }
     }
 
