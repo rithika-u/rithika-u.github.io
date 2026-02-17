@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Latest arXiv papers</title>
+    <style>
+      body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:900px;margin:24px auto;padding:0 16px}
+      h1{color:#1b3a57}
+      .paper{border-bottom:1px solid #eee;padding:12px 0}
+      .title{font-weight:600}
+      .meta{color:#555;font-size:0.9rem}
+      .abstract{margin-top:6px;color:#222}
+      a.pdf{color:#b22222}
+    </style>
+  </head>
+  <body>
+    <h1>Latest arXiv papers</h1>
+    <p id="status">Loading...</p>
+    <div id="papers"></div>
+
+    <script>
+      function truncate(s, n=300){ return s.length>n ? s.slice(0,n).trim() + '…' : s }
+      async function load(){
+        try{
+          const res = await fetch('/data/arxiv.json', {cache: 'no-store'})
+          if(!res.ok) throw new Error('Fetch failed')
+          const items = await res.json()
+          const out = document.getElementById('papers')
+          document.getElementById('status').textContent = `Found ${items.length} papers`;
+          if(items.length===0) out.innerHTML = '<p>No papers found.</p>'
+          items.forEach(p=>{
+            const d = document.createElement('div'); d.className='paper'
+            d.innerHTML = `<div class="title"><a href="${p.pdf_link}" target="_blank" rel="noopener noreferrer">${p.title}</a></div>`+
+                          `<div class="meta">${p.authors.join(', ')} — ${new Date(p.published).toLocaleDateString()}</div>`+
+                          `<div class="abstract">${truncate(p.abstract,500)}</div>`+
+                          `<div class="link"><a class="pdf" href="${p.pdf_link}" target="_blank">Download PDF</a></div>`
+            out.appendChild(d)
+          })
+        }catch(err){
+          document.getElementById('status').textContent = 'Failed to load papers.'
+          console.error(err)
+        }
+      }
+      load()
+    </script>
+  </body>
+</html>
