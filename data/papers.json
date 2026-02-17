@@ -1,35 +1,4 @@
 {
-  "papers": [
-    {
-      "id": "2401.08123",
-      "title": "Attention Is All You Need: A Transformer Architecture for Machine Learning",
-      "authors": ["Ashish Vaswani", "Noam Shazeer", "Parmar Noam"],
-      "summary": "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks. This paper presents a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.",
-      "published": "2023-01-15T00:00:00Z",
-      "category": "cs.LG",
-      "url": "https://arxiv.org/abs/2401.08123",
-      "pdfUrl": "https://arxiv.org/pdf/2401.08123.pdf"
-    },
-    {
-      "id": "2401.07654",
-      "title": "Large Language Models: A Survey of Recent Advances and Applications",
-      "authors": ["Jane Smith", "John Doe", "Alice Johnson"],
-      "summary": "Large Language Models (LLMs) have revolutionized natural language processing. This survey provides a comprehensive overview of recent advances in LLM development, training methodologies, and applications across various domains.",
-      "published": "2023-01-14T00:00:00Z",
-      "category": "cs.AI",
-      "url": "https://arxiv.org/abs/2401.07654",
-      "pdfUrl": "https://arxiv.org/pdf/2401.07654.pdf"
-    },
-    {
-      "id": "2401.06543",
-      "title": "Efficient Fine-tuning of Language Models for Downstream Tasks",
-      "authors": ["Bob Wilson", "Carol Davis"],
-      "summary": "Fine-tuning pre-trained language models for specific downstream tasks is a critical step in NLP. This paper proposes efficient fine-tuning methods that reduce computational requirements while maintaining model performance.",
-      "published": "2023-01-13T00:00:00Z",
-      "category": "cs.LG",
-      "url": "https://arxiv.org/abs/2401.06543",
-      "pdfUrl": "https://arxiv.org/pdf/2401.06543.pdf"
-    }
-  ],
-  "timestamp": "2026-02-13T14:46:00Z"
+  "papers": [],
+  "timestamp": "2026-02-17T22:53:44.717Z"
 }
